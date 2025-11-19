@@ -1,6 +1,8 @@
 package jade.product.shortify.global.exception;
 
+import jade.product.shortify.global.dto.ApiResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,41 +13,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
-        var error = e.getErrorCode();
+    public ResponseEntity<ApiResult<?>> handleCustomException(CustomException e) {
+        ErrorCode code = e.getErrorCode();
 
-        ErrorResponse response = ErrorResponse.builder()
-                .status(error.getStatus().value())
-                .code(error.name())
-                .message(error.getMessage())
-                .build();
-
-        return ResponseEntity.status(error.getStatus()).body(response);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
-
-        String message = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-
-        ErrorResponse response = ErrorResponse.builder()
-                .status(400)
-                .code("INVALID_INPUT_VALUE")
-                .message(message)
-                .build();
-
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity
+                .status(code.getStatus())
+                .body(ApiResult.error(code));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
-
-        ErrorResponse response = ErrorResponse.builder()
-                .status(500)
-                .code("INTERNAL_SERVER_ERROR")
-                .message("서버 내부 오류")
-                .build();
-
-        return ResponseEntity.internalServerError().body(response);
+    public ResponseEntity<ApiResult<?>> handleException(Exception e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResult.error(ErrorCode.INTERNAL_SERVER_ERROR));
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResult<?>> handleValidation(MethodArgumentNotValidException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResult.error(ErrorCode.INVALID_INPUT_VALUE));
+    }
+
 }
