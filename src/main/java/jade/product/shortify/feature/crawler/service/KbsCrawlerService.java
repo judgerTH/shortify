@@ -1,7 +1,6 @@
 package jade.product.shortify.feature.crawler.service;
 
-import jade.product.shortify.domain.article.entity.OriginalArticle;
-import jade.product.shortify.domain.article.repository.OriginalArticleRepository;
+import jade.product.shortify.feature.crawler.dto.ArticleContent;
 import jade.product.shortify.global.exception.CustomException;
 import jade.product.shortify.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -18,42 +17,55 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class KbsCrawlerService {
 
-    private final OriginalArticleRepository originalArticleRepository;
-
-    public OriginalArticle crawl(String url) {
+    public ArticleContent crawl(String url) {
         try {
             Document doc = Jsoup.connect(url)
                     .userAgent("Mozilla/5.0")
                     .timeout(10_000)
                     .get();
 
-            // 제목
+            // =========================
+            // 1) 제목
+            // =========================
             String title = doc.select("meta[property=og:title]").attr("content");
             if (title.isBlank()) {
                 title = doc.select(".headline-title").text();
             }
-            if (title.isBlank()) throw new CustomException(ErrorCode.INVALID_ARTICLE_STRUCTURE);
+            if (title.isBlank()) {
+                throw new CustomException(ErrorCode.INVALID_ARTICLE_STRUCTURE);
+            }
 
-            // 본문
+            // =========================
+            // 2) 본문
+            // =========================
             String content = doc.select(".detail-body").text();
-            if (content.isBlank()) content = doc.body().text();
-            if (content.isBlank()) throw new CustomException(ErrorCode.INVALID_ARTICLE_STRUCTURE);
+            if (content.isBlank()) {
+                content = doc.body().text();
+            }
+            if (content.isBlank()) {
+                throw new CustomException(ErrorCode.INVALID_ARTICLE_STRUCTURE);
+            }
 
-            // 언론사
+            // =========================
+            // 3) 언론사
+            // =========================
             String press = "KBS 뉴스";
 
-            // 발행일
+            // =========================
+            // 4) 발행일
+            // =========================
             LocalDateTime publishedAt = parseKbsPublishedAt(doc);
 
-            OriginalArticle article = OriginalArticle.builder()
+            // =========================
+            // 5) DTO로 반환 (DB 저장 X)
+            // =========================
+            return ArticleContent.builder()
                     .title(title)
                     .content(content)
                     .press(press)
                     .url(url)
                     .publishedAt(publishedAt)
                     .build();
-
-            return originalArticleRepository.save(article);
 
         } catch (CustomException e) {
             throw e;
@@ -68,6 +80,7 @@ public class KbsCrawlerService {
             String dateText = doc.select(".input-date").text();
             if (dateText.isBlank()) return null;
 
+            // "입력 2025.11.21 (15:19)" → "2025-11-21 15:19"
             dateText = dateText.replace("입력", "").trim();
             dateText = dateText.replace("(", "").replace(")", "").trim();
             dateText = dateText.replace(".", "-");
