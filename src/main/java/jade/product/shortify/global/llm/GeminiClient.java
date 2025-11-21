@@ -2,7 +2,6 @@ package jade.product.shortify.global.llm;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import jade.product.shortify.global.config.GeminiConfig;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.springframework.stereotype.Component;

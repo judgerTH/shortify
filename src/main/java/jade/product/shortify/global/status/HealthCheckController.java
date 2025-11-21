@@ -2,7 +2,7 @@ package jade.product.shortify.global.status;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jade.product.shortify.domain.ping.PingRepository;
+import jade.product.shortify.domain.ping.repository.PingRepository;
 import jade.product.shortify.global.dto.ApiResult;
 import jade.product.shortify.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

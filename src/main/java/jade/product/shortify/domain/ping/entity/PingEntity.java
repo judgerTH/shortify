@@ -1,4 +1,4 @@
-package jade.product.shortify.domain.ping;
+package jade.product.shortify.domain.ping.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

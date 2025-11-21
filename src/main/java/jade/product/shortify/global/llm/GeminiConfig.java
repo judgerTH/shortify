@@ -1,4 +1,4 @@
-package jade.product.shortify.global.config;
+package jade.product.shortify.global.llm;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

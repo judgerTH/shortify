@@ -39,6 +39,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     // LLM 호출
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    // crawler 추가
+    implementation 'org.jsoup:jsoup:1.18.1'
 
 }
 

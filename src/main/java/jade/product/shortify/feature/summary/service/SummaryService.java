@@ -1,4 +1,4 @@
-package jade.product.shortify.application.sample;
+package jade.product.shortify.feature.summary.service;
 
 import jade.product.shortify.global.llm.GeminiClient;
 import jade.product.shortify.global.llm.NewsPromptBuilder;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LLMService {
+public class SummaryService {
 
     private final GeminiClient geminiClient;
     private final NewsPromptBuilder promptBuilder;
