@@ -1,7 +1,7 @@
 package jade.product.shortify.feature.crawler.controller;
 
 import jade.product.shortify.domain.article.entity.OriginalArticle;
-import jade.product.shortify.feature.crawler.service.YnaCrawlerService;
+import jade.product.shortify.feature.crawler.service.CrawlerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/crawler")
 public class CrawlerController {
 
-    private final YnaCrawlerService crawlerService;
+    private final CrawlerService crawlerService;
 
     @PostMapping
     public OriginalArticle crawl(@RequestParam String url) {
