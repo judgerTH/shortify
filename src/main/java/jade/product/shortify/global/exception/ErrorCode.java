@@ -24,6 +24,9 @@ public enum ErrorCode {
     @Schema(description = "기사 구조 파싱 실패")
     INVALID_ARTICLE_STRUCTURE("C002", HttpStatus.BAD_REQUEST, "기사 구조 파싱 실패"),
 
+    @Schema(description = "지원하지 않는 언론사 URL")
+    UNSUPPORTED_NEWS_DOMAIN("C003", HttpStatus.BAD_REQUEST, "지원하지 않는 언론사 URL"),
+
     // Summary
     @Schema(description = "요약 생성 실패")
     SUMMARY_FAILED("S001", HttpStatus.BAD_REQUEST, "요약 생성 실패"),
