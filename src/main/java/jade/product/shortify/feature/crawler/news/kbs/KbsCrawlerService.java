@@ -1,4 +1,4 @@
-package jade.product.shortify.feature.crawler.service;
+package jade.product.shortify.feature.crawler.news.kbs;
 
 import jade.product.shortify.feature.crawler.dto.ArticleContent;
 import jade.product.shortify.global.exception.CustomException;

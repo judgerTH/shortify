@@ -2,33 +2,54 @@ package jade.product.shortify.domain.article.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "original_article")
 @Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class OriginalArticle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
-
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    private String press;          // 언론사 이름
+    @Column(length = 255)
+    private String title;
+
+    @Column(length = 255)
     private String url;
 
-    private LocalDateTime publishedAt; // 기사 작성일
+    @Column(length = 255)
+    private String press;
 
-    @CreationTimestamp
-    private LocalDateTime crawledAt;   // 크롤링 시각
+    private LocalDateTime publishedAt;
+
+    private LocalDateTime crawledAt;
+
+    private LocalDateTime createdAt;
+
+    public static OriginalArticle fromCrawler(
+            String url,
+            String title,
+            String content,
+            String press,
+            LocalDateTime publishedAt
+    ) {
+        return OriginalArticle.builder()
+                .url(url)
+                .title(title)
+                .content(content)
+                .press(press)
+                .publishedAt(publishedAt)
+                .crawledAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
 }

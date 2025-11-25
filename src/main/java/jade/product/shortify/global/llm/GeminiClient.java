@@ -6,29 +6,35 @@ import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 @RequiredArgsConstructor
 public class GeminiClient {
 
     private final GeminiConfig config;
-    private final OkHttpClient httpClient = new OkHttpClient();
+
+    // Timeout 1분 버전
+    private final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .connectTimeout(Duration.ofSeconds(10))     // 연결
+            .writeTimeout(Duration.ofSeconds(20))       // 요청 전송
+            .readTimeout(Duration.ofSeconds(60))        // 응답 대기
+            .callTimeout(Duration.ofSeconds(60))        // 전체 요청(1분)
+            .build();
 
     public String generate(String prompt) throws Exception {
 
-        // Google 공식 엔드포인트
         String url =
                 "https://generativelanguage.googleapis.com/v1beta/"
                         + config.getModel()
                         + ":generateContent?key=" + config.getApiKey();
 
-        // ===== parts 배열 =====
         JsonObject part = new JsonObject();
         part.addProperty("text", prompt);
 
         JsonArray parts = new JsonArray();
         parts.add(part);
 
-        // ===== contents 배열(role 추가 필수) =====
         JsonObject contentItem = new JsonObject();
         contentItem.addProperty("role", "user");
         contentItem.add("parts", parts);
@@ -36,7 +42,6 @@ public class GeminiClient {
         JsonArray contents = new JsonArray();
         contents.add(contentItem);
 
-        // ===== 전체 바디 =====
         JsonObject reqBody = new JsonObject();
         reqBody.add("contents", contents);
 
@@ -50,12 +55,7 @@ public class GeminiClient {
                 .post(body)
                 .build();
 
-        System.out.println("URL = " + url);
-        System.out.println("REQUEST = " + reqBody.toString());
-
         Response response = httpClient.newCall(request).execute();
-
-        System.out.println("RESPONSE CODE = " + response.code());
 
         String responseString = response.body().string();
 
