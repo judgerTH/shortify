@@ -32,6 +32,10 @@ public class ArticleSummary {
     @JoinColumn(name = "article_meta_id", nullable = false)
     private ArticleMeta articleMeta;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id", referencedColumnName = "summary_id", insertable=false, updatable=false)
+    private ArticleMeta meta;
+
     // === 여기가 create 메서드 ===
     public static ArticleSummary create(
             String title,

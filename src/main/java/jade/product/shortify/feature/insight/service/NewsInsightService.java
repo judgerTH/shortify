@@ -48,7 +48,7 @@ public class NewsInsightService {
 
         // 저장
         newsInsightRepo.save(
-                new NewsInsight(
+                NewsInsight.create(
                         insight.getTension(),
                         insight.getPositivity(),
                         insight.getStability(),
