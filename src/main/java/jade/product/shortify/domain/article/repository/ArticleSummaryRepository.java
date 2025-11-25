@@ -18,4 +18,13 @@ public interface ArticleSummaryRepository extends JpaRepository<ArticleSummary, 
     List<ArticleSummary> findTodaySummaries(LocalDateTime start, Pageable pageable);
 
     List<ArticleSummary> findTop30ByCreatedAtBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
+    @Query("""
+    SELECT s 
+    FROM ArticleSummary s 
+    JOIN FETCH s.meta m
+    WHERE s.createdAt BETWEEN :start AND :end
+    ORDER BY s.createdAt DESC
+    """)
+    List<ArticleSummary> findTop30WithMeta(LocalDateTime start, LocalDateTime end);
+
 }
