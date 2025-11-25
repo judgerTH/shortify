@@ -1,7 +1,7 @@
-package jade.product.shortify.feature.crawler.service;
+package jade.product.shortify.feature.crawler.news.yna;
 
 import jade.product.shortify.feature.crawler.dto.ArticleContent;
-import jade.product.shortify.feature.crawler.util.MbcCleaningUtils;
+import jade.product.shortify.feature.crawler.util.YnaCleaningUtils;
 import jade.product.shortify.global.exception.CustomException;
 import jade.product.shortify.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,10 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MbcCrawlerService {
+public class YnaCrawlerService {
 
     public ArticleContent crawl(String url) {
+
         try {
             Document doc = Jsoup.connect(url)
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
@@ -29,9 +30,8 @@ public class MbcCrawlerService {
             // 1) 제목
             // ============================
             String title = doc.select("meta[property=og:title]").attr("content");
-            if (title.isBlank()) {
-                title = doc.select("#news_title").text();
-            }
+            if (title.isBlank()) title = doc.select("#articleTitle").text();
+            if (title.isBlank()) title = doc.title();
 
             if (title.isBlank()) {
                 throw new CustomException(ErrorCode.INVALID_ARTICLE_STRUCTURE);
@@ -40,47 +40,45 @@ public class MbcCrawlerService {
             // ============================
             // 2) 본문
             // ============================
-            String content = doc.select("#news_content").text();
+            String content = doc.select("article").text();
+            if (content.isBlank()) content = doc.body().text();
+
+            content = YnaCleaningUtils.cleanYnaContent(content);
+
             if (content.isBlank()) {
-                content = doc.body().text();
-            }
-
-            content = MbcCleaningUtils.clean(content);
-
-            // 어느 정도 길이 안 나오면 구조 잘못 파싱된 걸로 간주
-            if (content.length() < 30) {
                 throw new CustomException(ErrorCode.INVALID_ARTICLE_STRUCTURE);
             }
 
             // ============================
             // 3) 언론사
             // ============================
-            String press = "MBC";
+            String press = doc.select("meta[property=og:site_name]").attr("content");
+            if (press.isBlank()) press = "연합뉴스";
 
             // ============================
             // 4) 발행일
             // ============================
             LocalDateTime publishedAt = null;
-            String publishedTime = doc.select("meta[property=article:published_time]").attr("content");
 
             try {
-                // case 1: meta ISO format (예: 2025-11-21T15:09:21+09:00)
+                String publishedTime = doc.select("meta[property=article:published_time]").attr("content");
+
                 if (!publishedTime.isBlank()) {
                     publishedAt = LocalDateTime.parse(publishedTime.substring(0, 19));
                 } else {
-                    // case 2: 화면 상 날짜 (예: "2025-11-21 15:22")
-                    String dateText = doc.select("#news_date").text();
-                    if (!dateText.isBlank()) {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-                        publishedAt = LocalDateTime.parse(dateText.trim(), formatter);
+                    String textDate = doc.select(".update-time").text();
+                    if (!textDate.isBlank()) {
+                        textDate = textDate.split("송고")[0].trim().replace("/", "-");
+                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                        publishedAt = LocalDateTime.parse(textDate, fmt);
                     }
                 }
-            } catch (Exception ignore) {
-                // 날짜는 없어도 되니까 무시
+            } catch (Exception e) {
+                log.warn("YNA 날짜 파싱 실패(무시): {}", e.getMessage());
             }
 
             // ============================
-            // 5) DTO 반환
+            // 5) DB 저장 X → DTO 반환
             // ============================
             return ArticleContent.builder()
                     .title(title)
@@ -93,7 +91,7 @@ public class MbcCrawlerService {
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            log.error("MBC 크롤링 실패", e);
+            log.error("YNA crawling failed: {}", e.getMessage(), e);
             throw new CustomException(ErrorCode.CRAWLING_FAILED);
         }
     }
