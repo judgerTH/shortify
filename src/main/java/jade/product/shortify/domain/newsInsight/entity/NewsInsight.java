@@ -8,9 +8,12 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class NewsInsight {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private int tension;
@@ -20,11 +23,16 @@ public class NewsInsight {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
-    public NewsInsight(int tension, int positivity, int stability, String summary) {
-        this.tension = tension;
-        this.positivity = positivity;
-        this.stability = stability;
-        this.summary = summary;
+    private LocalDateTime createdAt;
+
+    public static NewsInsight create(int tension, int positivity, int stability, String summary) {
+        return NewsInsight.builder()
+                .tension(tension)
+                .positivity(positivity)
+                .stability(stability)
+                .summary(summary)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 }
 

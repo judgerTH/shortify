@@ -46,14 +46,8 @@ public class ScheduleConfig {
         // 1) 직접 만든 크롤러 3개씩
         // ============================
         List<String> urls = new ArrayList<>();
-
-//        urls.addAll(kbsLatestService.fetchLatestArticles().stream().limit(3).toList());
-//        urls.addAll(mbcLatestService.fetchLatestArticles().stream().limit(3).toList());
-//        urls.addAll(ynaLatestService.fetchLatestArticles().stream().limit(3).toList());
-//        urls.addAll(naverLatestService.fetchLatestArticles("005").stream().limit(3).toList()); // 국민일보
-
         // ============================
-        // 1) 네이버 전체 언론사 중 각 언론사 1개씩
+        // 2) 네이버 전체 언론사 중 각 언론사 1개씩
         // ============================
         Map<String, String> pressMap = naverLatestService.fetchLatestAllPress();
 
