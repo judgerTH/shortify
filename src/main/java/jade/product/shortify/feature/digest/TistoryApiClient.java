@@ -2,6 +2,7 @@ package jade.product.shortify.feature.digest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,8 +19,8 @@ public class TistoryApiClient {
     private static final String TARGET_URL =
             "https://dev-work-jade.tistory.com/manage/post.json";
 
-    private static final String COOKIE =
-            "TSSESSION=f56ed35e88168b867da4158a2e4d7d459d9d8e9f;";
+    @Value("${shortify.cookie}")
+    private String cookie;
 
     // HTML을 JSON-safe 형태로 escape
     private String escapeHtml(String html) {
@@ -34,7 +35,7 @@ public class TistoryApiClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Cookie", COOKIE);
+        headers.add("Cookie", cookie);
         headers.add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36");
         headers.add("Referer",
@@ -51,7 +52,7 @@ public class TistoryApiClient {
         body.put("slogan", "daily-digest");
         body.put("category", 1286254);
         body.put("published", 1);
-        body.put("visibility", 0);
+        body.put("visibility", 20);
 
         body.put("password", "");
         body.put("attachments", new ArrayList<>());
