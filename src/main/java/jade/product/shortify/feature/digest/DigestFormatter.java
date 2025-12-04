@@ -9,9 +9,18 @@ import java.util.List;
 @Component
 public class DigestFormatter {
 
-    public String buildHtml(NewsInsight insight, List<ArticleSummary> news) {
+    public String buildHtml(NewsInsight insight, List<ArticleSummary> news, String thumbnailUrl) {
 
         StringBuilder sb = new StringBuilder();
+
+        if (thumbnailUrl != null && !thumbnailUrl.isBlank()) {
+            sb.append("<div style='margin-bottom:20px;text-align:center;'>")
+                    .append("<img src=\"")
+                    .append(thumbnailUrl)
+                    .append("\" style=\"max-width:100%;height:auto;\" />")
+                    .append("</div>")
+                    .append("<hr/>");
+        }
 
         // --- 사회 분위기 분석 ---
         sb.append("<h2>오늘의 사회 분위기 분석</h2>");

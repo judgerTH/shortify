@@ -9,6 +9,9 @@ import jade.product.shortify.global.llm.GeminiClient;
 import jade.product.shortify.global.llm.InsightParser;
 import jade.product.shortify.global.llm.InsightPromptBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,11 +30,13 @@ public class NewsInsightService {
 
         // 1) 오늘 summary 30개 가져오기
         LocalDate today = LocalDate.now();
-        List<ArticleSummary> list = summaryRepo
-                .findTop30ByCreatedAtBetween(
-                        today.atStartOfDay(),
-                        today.plusDays(1).atStartOfDay()
-                );
+        Pageable pageable = (Pageable) PageRequest.of(0, 30, Sort.by("createdAt").descending());
+        List<ArticleSummary> list = summaryRepo.findByCreatedAtBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay(),
+                pageable
+        ).getContent();
+
 
         // 2) 텍스트 합치기
         String combined = list.stream()
@@ -43,6 +48,9 @@ public class NewsInsightService {
         String raw = gemini.generate(prompt);
         System.out.println("RAW RESPONSE =====");
         System.out.println(raw);
+        System.out.println("=== Combined Summaries ===");
+        System.out.println(combined);
+        System.out.println("=== END ===");
 
         NewsInsightResponse insight = InsightParser.parse(raw);
 
