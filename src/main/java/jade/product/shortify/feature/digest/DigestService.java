@@ -4,10 +4,15 @@ import jade.product.shortify.domain.article.entity.ArticleSummary;
 import jade.product.shortify.domain.article.repository.ArticleSummaryRepository;
 import jade.product.shortify.domain.newsInsight.entity.NewsInsight;
 import jade.product.shortify.domain.newsInsight.repository.NewsInsightRepository;
+import jade.product.shortify.feature.digest.thumbnail.ThumbnailGenerator;
+import jade.product.shortify.feature.digest.thumbnail.ThumbnailUploader;
+import jade.product.shortify.feature.insight.service.NewsInsightService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -19,8 +24,12 @@ public class DigestService {
     private final RepresentativeNewsSelector selector;
     private final DigestFormatter formatter;
     private final TistoryPublisher tistoryPublisher;
+    private final NewsInsightService insightService;
+    private final ThumbnailGenerator thumbnailGenerator;
+    private final ThumbnailUploader thumbnailUploader;
 
     public void publishTodayDigest() throws Exception {
+        insightService.generateInsight();
 
         LocalDate today = LocalDate.now();
 
@@ -42,10 +51,34 @@ public class DigestService {
         NewsInsight insight = insightRepo.findFirstByOrderByCreatedAtDesc()
                 .orElseThrow();
 
+        // 날짜 및 제목 생성
+        String date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        String title = String.format(
+                "오늘의 소셜 다이제스트 - %s | 긴장도 %d · 긍정도 %d · 안정도 %d",
+                date,
+                insight.getTension(),
+                insight.getPositivity(),
+                insight.getStability()
+        );
+
         // 4) HTML 생성
-        String html = formatter.buildHtml(insight, top10);
+        // 1) 썸네일 생성
+        File thumbnailFile = thumbnailGenerator.generate(
+                date,
+                insight.getTension(),
+                insight.getPositivity(),
+                insight.getStability()
+        );
+
+        // 2) 썸네일 업로드 → URL
+        String thumbnailUrl = thumbnailUploader.upload(thumbnailFile);
+
+        // 3) HTML 생성 (썸네일 포함)
+        String html = formatter.buildHtml(insight, top10, thumbnailUrl);
 
         // 5) 티스토리에 업로드
-        tistoryPublisher.post(html);
+        tistoryPublisher.post(title, html);
+        System.out.println(html);
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
@@ -31,7 +33,7 @@ public class TistoryApiClient {
                 .replace("\r", "");
     }
 
-    public void publish(String html) throws Exception {
+    public void publish(String title, String html) throws Exception {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -41,12 +43,15 @@ public class TistoryApiClient {
         headers.add("Referer",
                 "https://dev-work-jade.tistory.com/manage/entry/post/");
 
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
+        String date = LocalDate.now().format(fmt);
+
         // escapeHtml 제거 — HTML 그대로 보내야 함
         String safeHtml = html;
 
         Map<String, Object> body = new HashMap<>();
         body.put("id", "0");
-        body.put("title", "오늘의 소셜 다이제스트");
+        body.put("title", title);
         body.put("content", safeHtml);
         body.put("contentType", "html");
         body.put("slogan", "daily-digest");

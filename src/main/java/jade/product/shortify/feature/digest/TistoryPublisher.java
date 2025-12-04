@@ -9,7 +9,8 @@ public class TistoryPublisher {
 
     private final TistoryApiClient apiClient;
 
-    public void post(String html) throws Exception {
-        apiClient.publish(html);
+    public void post(String title, String html) throws Exception {
+        apiClient.publish(title, html);
     }
+
 }
